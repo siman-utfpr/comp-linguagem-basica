@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+int yyparse();
+int yyrestart();
+
 static unsigned symhash(char *sym) {
   unsigned int hash = 0;
   unsigned c = 0;
@@ -154,6 +157,8 @@ void treefree(struct ast *a) {
       treefree(a->r);
     case 'C':
     case 'F':
+    case '&':
+    case '|':
       treefree(a->l);
     case 'K':
     case 'N':
@@ -163,6 +168,7 @@ void treefree(struct ast *a) {
       break;
     case 'I':
     case 'W':
+    case 'P':
       free(((struct flow *)a)->cond);
       if (((struct flow *)a)->tl) treefree(((struct flow *)a)->tl);
       if (((struct flow *)a)->el) treefree(((struct flow *)a)->el);
@@ -226,6 +232,13 @@ double eval(struct ast *a) {
       v = eval(a->l) / eval(a->r);
       break;
 
+    case '&':
+      v = eval(a->l) && eval(a->r);
+      break;
+    case '|':
+      v = eval(a->l) || eval(a->r);
+      break;
+
     case '1':
       v = (eval(a->l) > eval(a->r)) ? 1 : 0;
       break;
@@ -263,6 +276,14 @@ double eval(struct ast *a) {
 
     case 'W':
       v = 0.0;
+      if (((struct flow *)a)->tl) {
+        while (eval(((struct flow *)a)->cond) != 0) {
+          v = eval(((struct flow *)a)->tl);
+        }
+      }
+      break;
+    case 'P':
+      // v = 0.0;
       if (((struct flow *)a)->tl) {
         while (eval(((struct flow *)a)->cond) != 0) {
           v = eval(((struct flow *)a)->tl);
@@ -387,7 +408,15 @@ void yyerror(char *s, ...) {
   fprintf(stderr, "\n");
 }
 
-int main() {
-  printf("> ");
-  return yyparse();
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    printf("> ");
+    return yyparse();
+  } else {
+    FILE *arquivoEntrada;
+    arquivoEntrada = fopen(argv[1], "r");
+    yyrestart(arquivoEntrada);
+    freopen(argv[2], "w", stdout);
+    return yyparse();
+  }
 }

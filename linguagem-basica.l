@@ -15,12 +15,12 @@ EXP ([Ee][-+]?[0-9]+)
 "," |
 ";" |
 "(" |
-")" {return yytext[0]; }
-
+")" {return yytext[0]; }  
+     
 ">" {yylval.fn = 1; return CMP; }
-"<" {yylval.fn = 2; return CMP; }
+"<" {yylval.fn = 2; return CMP; }         
 "<>" {yylval.fn = 3; return CMP; }
-"==" {yylval.fn = 4; return CMP; }
+"==" {yylval.fn = 4; return CMP; }       
 ">=" {yylval.fn = 5; return CMP; }
 "<=" {yylval.fn = 6; return CMP; }
 
@@ -28,8 +28,11 @@ EXP ([Ee][-+]?[0-9]+)
 "then" {return THEN; }
 "else" {return ELSE; }
 "while" {return WHILE; }
+"for" {return FOR; }
 "do" {return DO; }
 "let" {return LET; }
+"and" {return AND; }
+"or" {return OR; }
 
 "sqrt" {yylval.fn = B_sqrt; return FUNC; }
 "exp" {yylval.fn = B_exp; return FUNC; }

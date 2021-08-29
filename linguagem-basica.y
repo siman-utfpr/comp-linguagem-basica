@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "linguagem-basica.h"  
+
+int yylex();
 %}
 
 %union {
@@ -17,8 +19,9 @@
 %token <fn> FUNC
 %token EOL
 
-%token IF THEN ELSE WHILE DO LET
+%token IF THEN ELSE WHILE DO LET FOR AND OR
 
+%left AND OR
 %nonassoc <fn> CMP
 %right '='
 %left '+' '-'
@@ -33,6 +36,7 @@
 stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
   | IF exp THEN list ELSE list { $$ = newflow('I', $2, $4, $6); }
   | WHILE exp DO list { $$ = newflow('W', $2, $4, NULL); }
+  | FOR exp ';' exp ';' exp DO list { eval($2); $$ = newflow('P', $4, newast('L', $8, $6), NULL); }     
   | exp
   ;
 
@@ -51,6 +55,8 @@ exp: exp CMP exp { $$ = newcmp($2, $1, $3); }
   | exp '-' exp { $$ = newast('-', $1, $3); }
   | exp '*' exp { $$ = newast('*', $1, $3); }
   | exp '/' exp { $$ = newast('/', $1, $3); }
+  | exp AND exp { $$ = newast('&', $1, $3); }
+  | exp OR exp { $$ = newast('|', $1, $3); }
   | '(' exp ')' { $$ = $2; }
   | NUMBER {$$ = newnum($1); }
   | NAME { $$ = newref($1); }
@@ -62,7 +68,7 @@ exp: exp CMP exp { $$ = newcmp($2, $1, $3); }
 explist: exp 
   | exp ',' explist {$$ = newast('L', $1, $3); }
   ;
-
+  
 symlist: NAME {$$ = newsymlist($1, NULL); }
   | NAME ',' symlist { $$ = newsymlist($1, $3); }
   ;

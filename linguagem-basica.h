@@ -23,10 +23,12 @@ void symlistfree(struct symlist *sl);
 
 /* tipos de nós
   + - * /
+  & |
   0-7 operadores de comparação, 04 igual, 02 menpr que, 01 maior que
   L expressao ou lista de comandos
   I comando IF
   W comando WHILE
+  P comando FOR
   N symbol de referencia
   = atribuicao
   S lista de simbolos
@@ -61,7 +63,7 @@ struct ufncall {
 };
 
 struct flow {
-  int nodetype;  // I ou W
+  int nodetype;  // I ou W ou P
   struct ast *cond;
   struct ast *tl;
   struct ast *el;
